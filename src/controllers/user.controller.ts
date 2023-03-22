@@ -7,6 +7,7 @@ import { User } from "../interfaces/user.interfaces";
 export async function addUser(req: Request, res: Response): Promise<Response> {
     //adds an user to the database
     const newUser: User = req.body;
+    //todo: verify mail
     const conn = connect();
     await conn.query('INSERT INTO users SET ?', newUser);
     return res.json('user created')
