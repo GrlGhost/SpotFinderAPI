@@ -1,16 +1,27 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { connect } from "../database";
+import { BadRequestError } from "../error";
+import { HttpStatus } from "../httpStatus";
 import { User } from "../interfaces/user.interfaces";
 
 
 //TODO: check if datatipe body can be aplied interface user
-export async function addUser(req: Request, res: Response): Promise<Response> {
+export async function addUser(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     //adds an user to the database
-    const newUser: User = req.body;
-    //todo: verify mail
-    const conn = connect();
-    await conn.query('INSERT INTO users SET ?', newUser);
-    return res.json('user created')
+    const body = req.body;
+    console.log("Analizing body");
+    if (body.mail == null) return next(new BadRequestError(true, 'mail'));
+    else if (body.userName == null) return next(new BadRequestError(true, 'userName'));
+    else if (body.psw == null) return next(new BadRequestError(true, 'psw'));
+    else {
+        console.log("Body verified");
+
+        const newUser: User = body;
+        //TODO: verify mail
+        const conn = connect();
+        await conn.query('INSERT INTO users SET ?', newUser);
+        return res.status(HttpStatus.OK).json({ response: 'Succesfuly created user' })
+    }
 }
 
 export async function modifieUser(req: Request, res: Response): Promise<Response> {

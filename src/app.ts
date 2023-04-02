@@ -1,18 +1,26 @@
-import express, { Application } from "express"
+import express, { Application, NextFunction, Response, Request } from "express"
 import morgan from "morgan"
 import indexRoutes from './routes/index.routes'
 import usersRouter from "./routes/user.routes";
+import { ErrorRest } from "./error";
+import { ErrorHandler } from "./errorHandler";
+import { HttpStatus } from "./httpStatus";
+
 
 
 export class App {
     private app: Application;
+    private errorHandler: ErrorHandler;
 
     constructor(port: number) {
         this.app = express();
 
+        this.errorHandler = new ErrorHandler();
+
         this.settings(port);
         this.middlewares();
         this.routes();
+        this.app.use(this.middlewareErrorHandler);
     }
 
     //#region public
@@ -36,8 +44,8 @@ export class App {
 
     private middlewares() {
         this.app.use(morgan('dev'));
-        this.app.use(express.urlencoded({ extended: false })) //this is necesary
-        this.app.use(express.json())
+        this.app.use(express.urlencoded({ extended: false })); //this is necesary
+        this.app.use(express.json());
     }
 
     private routes() {
@@ -45,5 +53,22 @@ export class App {
         this.app.use('/users', usersRouter)
     }
 
+    private async middlewareErrorHandler(err: Error, req: Request, res: Response, next: NextFunction) {
+        console.log('middleware error handler');
+
+        if (err instanceof ErrorRest) {
+            console.log('was an rest error');
+
+            return res.status(err.status).send(err.serializeError());
+        }
+        else {
+            return res.status(HttpStatus.InternalServerError).send('Internal server error');
+        }
+    }
+
+
+
     //#endregion
 }
+
+

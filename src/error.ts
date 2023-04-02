@@ -1,5 +1,6 @@
 import { HttpStatus } from "./httpStatus";
 
+///Errors that must be reported to the user
 export class ErrorRest extends Error {
     public readonly status: number;
 
@@ -11,14 +12,23 @@ export class ErrorRest extends Error {
         this.name = Error.name;
         Error.captureStackTrace(this);
     }
+
+    public serializeError(): {} {
+        return { 'name': this.name, 'status': this.status, 'message': this.message };
+    }
 }
 
 export class BadRequestError extends ErrorRest {
     public readonly propertyName;
 
-    constructor(propertyName: string) {
+    constructor(operational: boolean, propertyName: string) {
         super({ status: HttpStatus.BadRequest, message: 'Request was wrong format, expected property ' + propertyName })
-        this.propertyName = propertyName
+        this.propertyName = propertyName;
+        this.name = BadRequestError.name;
+    }
+
+    public override serializeError(): {} {
+        return { 'name': this.name, 'status': this.status, 'message': this.message, 'property': this.propertyName };
     }
 
 }
@@ -26,8 +36,9 @@ export class BadRequestError extends ErrorRest {
 export class NotFoundError extends ErrorRest {
     public readonly propertyName: string;
 
-    constructor(propertyName: string, detail: string) {
+    constructor(operational: boolean, propertyName: string) {
         super({ status: HttpStatus.NotFound, message: 'Property ' + propertyName + ' not found.' });
         this.propertyName = propertyName;
+        this.name = NotFoundError.name;
     }
 }
