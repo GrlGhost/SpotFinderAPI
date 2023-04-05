@@ -1,12 +1,12 @@
-import { createPool } from "mysql2/promise"
+import { Pool } from "pg"
 
+//TODO: might have to pass the port
 export function connect() {
-    const connection = createPool({
+    const connection = new Pool({
         host: 'localhost',
-        user: 'root',
-        password: 'Ghost1645',
-        database: 'spotfinderdb',
-        connectionLimit: 10
+        user: 'postgres',
+        password: 'Ghost2109Alpha',
+        database: 'SpotFinder',
     });
     return connection;
 }

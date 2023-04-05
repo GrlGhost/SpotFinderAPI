@@ -44,10 +44,10 @@ export class App {
     }
 
     private middlewares() {
+        this.app.use(cors());
         this.app.use(morgan('dev'));
         this.app.use(express.urlencoded({ extended: false })); //this is necesary
         this.app.use(express.json());
-        this.app.use(cors());
         this.app.use(this.middleWareExample)
     }
 

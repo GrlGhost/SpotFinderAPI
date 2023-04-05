@@ -19,7 +19,8 @@ export async function addUser(req: Request, res: Response, next: NextFunction): 
         const newUser: User = body;
         //TODO: verify mail
         const conn = connect();
-        await conn.query('INSERT INTO users SET ?', newUser);
+        await conn.query('INSERT INTO users(username, mail, psw) VALUES($1, $2, $3)',
+            [newUser.userName, newUser.mail, newUser.psw]);
         return res.status(HttpStatus.OK).json({ response: 'Succesfuly created user' })
 
     } catch (err) {
@@ -34,7 +35,7 @@ export async function modifieUser(req: Request, res: Response, next: NextFunctio
         //TODO: verify mail.
         const psw: string = req.body.psw; //TODO: check data type
         const conn = connect();
-        await conn.query('UPDATE users set psw = ? WHERE mail = ?', [psw, mail])
+        await conn.query('UPDATE users set psw = $1 WHERE mail = $2', [psw, mail])
         return res.status(HttpStatus.OK).json('user modified')
     } catch (err) {
         return next(err);
@@ -47,7 +48,7 @@ export async function deleteUser(req: Request, res: Response, next: NextFunction
         //TODO: delete data from favorites table
         const mail: string = req.params.userMail
         const conn = connect();
-        await conn.query('DELETE FROM users WHERE mail = ?', [mail])
+        await conn.query('DELETE FROM users WHERE mail = $1', [mail])
         return res.json('user delete')
     } catch (err) {
         return next(err);
