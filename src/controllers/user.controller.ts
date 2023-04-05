@@ -14,15 +14,14 @@ export async function addUser(req: Request, res: Response, next: NextFunction): 
         if (body.mail == null) throw new BadRequestError(true, 'mail');
         else if (body.userName == null) throw new BadRequestError(true, 'userName');
         else if (body.psw == null) throw new BadRequestError(true, 'psw');
-        else {
-            console.log("Body verified");
 
-            const newUser: User = body;
-            //TODO: verify mail
-            const conn = connect();
-            await conn.query('INSERT INTO users SET ?', newUser);
-            return res.status(HttpStatus.OK).json({ response: 'Succesfuly created user' })
-        }
+        console.log("Body verified");
+        const newUser: User = body;
+        //TODO: verify mail
+        const conn = connect();
+        await conn.query('INSERT INTO users SET ?', newUser);
+        return res.status(HttpStatus.OK).json({ response: 'Succesfuly created user' })
+
     } catch (err) {
         return next(err);
     }
@@ -32,10 +31,11 @@ export async function modifieUser(req: Request, res: Response, next: NextFunctio
     try {
         //modifie an user to the database
         const mail: string = req.params.userMail
+        //TODO: verify mail.
         const psw: string = req.body.psw; //TODO: check data type
         const conn = connect();
         await conn.query('UPDATE users set psw = ? WHERE mail = ?', [psw, mail])
-        return res.json('user modified')
+        return res.status(HttpStatus.OK).json('user modified')
     } catch (err) {
         return next(err);
     }

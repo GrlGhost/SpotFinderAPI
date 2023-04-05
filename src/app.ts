@@ -5,6 +5,7 @@ import usersRouter from "./routes/user.routes";
 import { ErrorRest } from "./error";
 import { ErrorHandler } from "./errorHandler";
 import { HttpStatus } from "./httpStatus";
+import cors from "cors";
 
 
 
@@ -46,6 +47,7 @@ export class App {
         this.app.use(morgan('dev'));
         this.app.use(express.urlencoded({ extended: false })); //this is necesary
         this.app.use(express.json());
+        this.app.use(cors());
         this.app.use(this.middleWareExample)
     }
 
