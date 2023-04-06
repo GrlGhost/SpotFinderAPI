@@ -28,7 +28,12 @@ export class BadRequestError extends ErrorRest {
     }
 
     public override serializeError(): {} {
-        return { 'name': this.name, 'status': this.status, 'message': this.message, 'property': this.propertyName };
+        return {
+            'name': this.name,
+            'status': this.status,
+            'message': this.message,
+            'property': this.propertyName
+        };
     }
 
 }
@@ -41,4 +46,58 @@ export class NotFoundError extends ErrorRest {
         this.propertyName = propertyName;
         this.name = NotFoundError.name;
     }
+}
+
+export class BadRequestGeoBoxError extends ErrorRest {
+    public readonly propertyNameMin;
+    public readonly propertyNameMax;
+
+    constructor(operational: boolean, propertyNameMin: string, propertyNameMax: string) {
+        super({
+            status: HttpStatus.BadRequest, message: 'Request was wrong format, expected property ' + propertyNameMin +
+                ' to be <= to ' + propertyNameMax
+        })
+        this.propertyNameMin = propertyNameMin;
+        this.propertyNameMax = propertyNameMax;
+        this.name = BadRequestError.name;
+    }
+
+    public override serializeError(): {} {
+        return {
+            'name': this.name,
+            'status': this.status,
+            'message': this.message,
+            'property min': this.propertyNameMin,
+            'property max': this.propertyNameMax
+        };
+    }
+}
+
+export class BadRequestGeoBoxOutOfBoundsError extends ErrorRest {
+    public readonly propertyName;
+    public readonly minValue: number;
+    public readonly maxValue: number;
+
+    constructor(operational: boolean, propertyName: string, minValue: number, maxValue: number) {
+        super({
+            status: HttpStatus.BadRequest, message: 'Request was wrong format, expected property ' + propertyName +
+                ' value to be between ' + minValue + ' and ' + maxValue
+        })
+        this.propertyName = propertyName;
+        this.minValue = minValue;
+        this.maxValue = maxValue;
+        this.name = BadRequestError.name;
+    }
+
+    public override serializeError(): {} {
+        return {
+            'name': this.name,
+            'status': this.status,
+            'message': this.message,
+            'property': this.propertyName,
+            'minimun value': this.minValue,
+            'maximun value': this.maxValue
+        };
+    }
+
 }

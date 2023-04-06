@@ -6,6 +6,7 @@ import { ErrorRest } from "./error";
 import { ErrorHandler } from "./errorHandler";
 import { HttpStatus } from "./httpStatus";
 import cors from "cors";
+import parkingRouter from "./routes/parking.routes";
 
 
 
@@ -53,7 +54,8 @@ export class App {
 
     private routes() {
         this.app.use(indexRoutes);
-        this.app.use('/users', usersRouter)
+        this.app.use('/users', usersRouter);
+        this.app.use('/parkings', parkingRouter);
     }
 
     private async middlewareErrorHandler(err: Error, req: Request, res: Response, next: NextFunction) {
