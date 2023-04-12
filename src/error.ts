@@ -101,3 +101,22 @@ export class BadRequestGeoBoxOutOfBoundsError extends ErrorRest {
     }
 
 }
+
+export class PassWordMissMatch extends ErrorRest {
+    public readonly propertyName;
+
+    constructor(operational: boolean) {
+        super({ status: HttpStatus.BadRequest, message: 'Password didnt matched.' })
+        this.propertyName = 'psw';
+        this.name = BadRequestError.name;
+    }
+
+    public override serializeError(): {} {
+        return {
+            'name': this.name,
+            'status': this.status,
+            'message': this.message,
+            'property': this.propertyName
+        };
+    }
+}

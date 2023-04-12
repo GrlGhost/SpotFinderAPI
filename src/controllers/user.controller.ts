@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
+import bcrypt from "bcrypt";
+import jwt from 'jsonwebtoken';
 import { connect } from "../database";
-import { BadRequestError } from "../error";
+import { BadRequestError, NotFoundError, PassWordMissMatch } from "../error";
 import { HttpStatus } from "../httpStatus";
 import { User } from "../interfaces/user.interfaces";
 
@@ -18,13 +20,45 @@ export async function addUser(req: Request, res: Response, next: NextFunction): 
         console.log("Body verified");
         const newUser: User = body;
         //TODO: verify mail
+
+        const hPsw = await bcrypt.hash(newUser.psw, 10);
+
         const conn = connect();
         await conn.query('INSERT INTO users(username, mail, psw) VALUES($1, $2, $3)',
-            [newUser.userName, newUser.mail, newUser.psw]);
-        return res.status(HttpStatus.OK).json({ response: 'Succesfuly created user' })
+            [newUser.userName, newUser.mail, hPsw]);
 
+        req.params = { "userMail": body.mail };
+
+        next();
     } catch (err) {
         return next(err);
+    }
+}
+
+export async function logInUser(req: Request, res: Response, next: NextFunction) {
+    try {
+        if (!req.body.psw) throw new BadRequestError(true, 'psw');
+
+        const conn = connect();
+        let response;
+
+        if (req.params.userMail) {
+            response = await conn.query('SELECT * FROM users WHERE mail = $1', [req.params.userMail]);
+        } else throw new BadRequestError(true, 'userMail');
+
+        if (response.rowCount == 0) throw new NotFoundError(true, 'user');
+
+        const user: User = response.rows[0];
+
+        console.log("psw: " + req.body.psw);
+
+        const pswMatch: Boolean = bcrypt.compareSync(req.body.psw, user.psw);
+        if (!pswMatch) throw new PassWordMissMatch(true);
+
+        const token = jwt.sign({ payload: { mail: user.mail, userName: user.userName } }, 'SpotFinderSecretPSW105920');
+        res.status(HttpStatus.OK).send(token);
+    } catch (err) {
+        next(err);
     }
 }
 
@@ -54,3 +88,4 @@ export async function deleteUser(req: Request, res: Response, next: NextFunction
         return next(err);
     }
 }
+
