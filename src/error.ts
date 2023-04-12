@@ -108,7 +108,7 @@ export class PassWordMissMatch extends ErrorRest {
     constructor(operational: boolean) {
         super({ status: HttpStatus.BadRequest, message: 'Password didnt matched.' })
         this.propertyName = 'psw';
-        this.name = BadRequestError.name;
+        this.name = PassWordMissMatch.name;
     }
 
     public override serializeError(): {} {
@@ -119,4 +119,24 @@ export class PassWordMissMatch extends ErrorRest {
             'property': this.propertyName
         };
     }
+}
+
+export class Unauthorize extends ErrorRest {
+    public readonly cause;
+
+    constructor(operational: boolean, cause: string) {
+        super({ status: HttpStatus.BadRequest, message: 'Does not have authoritation, cause: ' + cause })
+        this.cause = cause;
+        this.name = Unauthorize.name;
+    }
+
+    public override serializeError(): {} {
+        return {
+            'name': this.name,
+            'status': this.status,
+            'message': this.message,
+            'action': this.cause
+        };
+    }
+
 }

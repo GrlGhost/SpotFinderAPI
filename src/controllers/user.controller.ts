@@ -5,6 +5,7 @@ import { connect } from "../database";
 import { BadRequestError, NotFoundError, PassWordMissMatch } from "../error";
 import { HttpStatus } from "../httpStatus";
 import { User } from "../interfaces/user.interfaces";
+import { session } from "../interfaces/session.interface";
 
 
 //TODO: check if datatipe body can be aplied interface user
@@ -55,7 +56,9 @@ export async function logInUser(req: Request, res: Response, next: NextFunction)
         const pswMatch: Boolean = bcrypt.compareSync(req.body.psw, user.psw);
         if (!pswMatch) throw new PassWordMissMatch(true);
 
-        const token = jwt.sign({ payload: { mail: user.mail, userName: user.userName } }, 'SpotFinderSecretPSW105920');
+        const sessionData: session = { userMail: user.mail, userName: user.userName };
+        const token = jwt.sign(sessionData, 'SpotFinderSecretPSW105920',
+            { 'expiresIn': '3h' });
         res.status(HttpStatus.OK).send(token);
     } catch (err) {
         next(err);
