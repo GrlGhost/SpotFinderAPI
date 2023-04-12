@@ -6,18 +6,20 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 
 export async function authForUserActions(req: Request, res: Response, next: NextFunction) {
     try {
-        if (!req.body.token) throw new BadRequestError(true, 'token');
+        if (!req.header('Authorization')) throw new BadRequestError(true, 'Authorization');
+
+        const token: string = req.header('Authorization')?.replace('Bearer ', '') as string;
 
         //TODO: aplly sesion interface and verify mail.
-        const tokenDecoded: JwtPayload = jwt.verify(req.body.token, 'SpotFinderSecretPSW105920') as JwtPayload;
+        const tokenDecoded: JwtPayload = jwt.verify(token, 'SpotFinderSecretPSW105920') as JwtPayload;
         console.log(tokenDecoded);
 
         if (req.params.userMail) {
-            if (req.params.userMail != tokenDecoded.userMail) throw new Unauthorize(true, 'for action user must be the same as stated in the token');
+            if (req.params.userMail != tokenDecoded.userMail) throw new Unauthorize(true, 'verify user');
 
             next();
         } else if (req.body.mail) {
-            if (req.body.mail != tokenDecoded.userMail) throw new Unauthorize(true, 'for action user must be the same as stated in the token');
+            if (req.body.mail != tokenDecoded.userMail) throw new Unauthorize(true, 'verify user');
 
             next();
         } else throw new BadRequestError(true, 'params.userMail | body.mail');

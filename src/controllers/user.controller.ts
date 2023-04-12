@@ -68,11 +68,13 @@ export async function logInUser(req: Request, res: Response, next: NextFunction)
 export async function modifieUser(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
         //modifie an user to the database
-        const mail: string = req.params.userMail
-        //TODO: verify mail.
+        const mail: string = req.params.userMail;
         const psw: string = req.body.psw; //TODO: check data type
+
+        const hPsw = await bcrypt.hash(psw, 10);
+
         const conn = connect();
-        await conn.query('UPDATE users set psw = $1 WHERE mail = $2', [psw, mail])
+        await conn.query('UPDATE users set psw = $1 WHERE mail = $2', [hPsw, mail])
         return res.status(HttpStatus.OK).json('user modified')
     } catch (err) {
         return next(err);
