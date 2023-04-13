@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response, request } from "express";
 import { connect } from "../database";
 import { BadRequestError, BadRequestGeoBoxError, BadRequestGeoBoxOutOfBoundsError } from "../error";
 import { HttpStatus } from "../httpStatus";
@@ -34,7 +34,11 @@ export async function modifieParking(req: Request, res: Response, next: NextFunc
 
 export async function deleteParking(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
-        throw new Error("not implemented");
+        const parkingID = req.params.id;
+
+        const conn = connect();
+        await conn.query('DELETE FROM parkings WHERE id = $1', [parkingID]);
+        res.status(HttpStatus.OK).send('parking deleted');
     } catch (err) {
         return next(err);
     }
@@ -55,8 +59,16 @@ export async function getParkingsFromArea(req: Request, res: Response, next: Nex
 
         const conn = connect();
         //min_lon, min_lat, max_lon, max_lat, 4326
-        const result = await conn.query('SELECT * FROM parkings WHERE ST_Intersects(geog, ST_MakeEnvelope($1, $2, $3, $4, 4326))',
+        const result = await conn.query('SELECT gid, ST_AsGeoJSON(ST_Transform(geog::geometry, 4326)) AS latLong, ' +
+            'name, capacity, openhour, closehour, phone, rating' +
+            ' FROM parkings WHERE ST_Intersects(geog, ST_MakeEnvelope($1, $2, $3, $4, 4326))',
             [area.mLon, area.mLat, area.MLon, area.MLat]);
+
+        //TODO: only return {"lat": 10.4, "long": 34.5} in latLong from databse;
+        result.rows.forEach(r => {
+            let arr: number[] = JSON.parse(result.rows[0].latlong).coordinates;
+            r.latlong = { "lat": arr[0], "long": arr[1] };
+        });
 
         res.status(HttpStatus.OK).json(result.rows);
     } catch (err) {
