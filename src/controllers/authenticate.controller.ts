@@ -10,9 +10,7 @@ export async function authForUserActions(req: Request, res: Response, next: Next
 
         const token: string = req.header('Authorization')?.replace('Bearer ', '') as string;
 
-        //TODO: aplly sesion interface and verify mail.
         const tokenDecoded: JwtPayload = jwt.verify(token, 'SpotFinderSecretPSW105920') as JwtPayload;
-        console.log(tokenDecoded);
 
         if (req.params.userMail) {
             if (req.params.userMail != tokenDecoded.userMail) throw new Unauthorize(true, 'verify user');

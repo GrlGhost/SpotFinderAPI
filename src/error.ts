@@ -1,5 +1,7 @@
 import { HttpStatus } from "./httpStatus";
 
+//TODO: move errors to folder.
+
 ///Errors that must be reported to the user
 export class ErrorRest extends Error {
     public readonly status: number;
@@ -125,7 +127,7 @@ export class Unauthorize extends ErrorRest {
     public readonly cause;
 
     constructor(operational: boolean, cause: string) {
-        super({ status: HttpStatus.BadRequest, message: 'Does not have authoritation, cause: ' + cause })
+        super({ status: HttpStatus.Unauthorised, message: 'Does not have authoritation, cause: ' + cause })
         this.cause = cause;
         this.name = Unauthorize.name;
     }
