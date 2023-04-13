@@ -88,7 +88,7 @@ export async function deleteUser(req: Request, res: Response, next: NextFunction
         const mail: string = req.params.userMail
         const conn = connect();
         await conn.query('DELETE FROM users WHERE mail = $1', [mail])
-        return res.json('user delete')
+        return res.status(HttpStatus.OK).json('user delete')
     } catch (err) {
         return next(err);
     }
