@@ -1,6 +1,6 @@
-import { NextFunction, Request, Response, request } from "express";
+import { NextFunction, Request, Response } from "express";
 import { connect } from "../database";
-import { BadRequestError, BadRequestGeoBoxError, BadRequestGeoBoxOutOfBoundsError } from "../error";
+import { BadRequestGeoBoxError, BadRequestGeoBoxOutOfBoundsError } from "../error";
 import { HttpStatus } from "../httpStatus";
 import { parking } from "../interfaces/parking.interface";
 import { boxArea } from "../interfaces/boxArea.interface";
@@ -26,7 +26,33 @@ export async function addParking(req: Request, res: Response, next: NextFunction
 
 export async function modifieParking(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
-        throw new Error("not implemented");
+        const parkingID = req.params.id;
+        const updates = req.body;
+
+        const allowedColumns: string[] = ['name', 'capacity', 'openHour', 'closeHour', 'phone', 'ownerMail'];
+        const validUpdates: validUpdates = {};
+
+        Object.keys(updates).forEach(key => {
+            if (allowedColumns.includes(key)) {
+                validUpdates[key] = updates[key];
+            }
+        });
+
+        let i: number = 1;
+        let columns = Object.keys(validUpdates).map(key => `${key} = $${i++}`).join(', ');
+        let values = Object.values(validUpdates);
+
+        let dbReq = `UPDATE parkings SET ${columns} WHERE gid = $${i}`;
+        values.push(parkingID);
+
+        console.log('query built:');
+        console.log('query:', dbReq);
+        console.log('params:', values);
+
+        const conn = connect();
+        await conn.query(dbReq, values);
+
+        res.status(HttpStatus.OK).send('parking modified')
     } catch (err) {
         return next(err);
     }
@@ -83,4 +109,8 @@ function assertBox(mLon: number, mLat: number, MLon: number, MLat: number) {
     if (MLon < -180 || 180 < MLon) throw new BadRequestGeoBoxOutOfBoundsError(true, 'MLon', -180, 180);
     if (mLat < -90 || 90 < mLat) throw new BadRequestGeoBoxOutOfBoundsError(true, 'mLat', -90, 90);
     if (MLat < -90 || 90 < MLat) throw new BadRequestGeoBoxOutOfBoundsError(true, 'MLat', -90, 90);
+}
+
+interface validUpdates {
+    [key: string]: any;
 }
