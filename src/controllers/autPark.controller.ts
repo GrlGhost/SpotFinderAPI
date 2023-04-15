@@ -23,10 +23,7 @@ export async function authForParkingOwner(req: Request, res: Response, next: Nex
 
         if (dbRes.rowCount == 0) throw new NotFoundError(true, 'parking');
 
-        console.log(dbRes.row);
-        console.log(dbRes.rows);
-
-        if (dbRes.row[0] != tokenDecoded.userMail) throw new Unauthorize(true, 'verify user or parking');
+        if (dbRes.rows[0].ownermail != tokenDecoded.userMail) throw new Unauthorize(true, 'verify user or parking');
 
         next();
     } catch (err) {
