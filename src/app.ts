@@ -7,18 +7,21 @@ import { ErrorHandler } from "./errorHandler";
 import { HttpStatus } from "./httpStatus";
 import cors from "cors";
 import parkingRouter from "./routes/parking.routes";
+import { addClients } from "./controllers/addClients.controller";
+import { ClientsManager } from "./clientsManager";
 
 
 
 export class App {
     private app: Application;
     private errorHandler: ErrorHandler;
+    private appClients: ClientsManager;
 
     constructor(port: number) {
-        this.app = express();
-
+        this.appClients = new ClientsManager();
         this.errorHandler = new ErrorHandler();
 
+        this.app = express();
         this.settings(port);
         this.middlewares();
         this.routes();
@@ -55,7 +58,7 @@ export class App {
     private routes() {
         this.app.use(indexRoutes);
         this.app.use('/users', usersRouter);
-        this.app.use('/parkings', parkingRouter);
+        this.app.use('/parkings', addClients(this.appClients), parkingRouter);
     }
 
     private async middlewareErrorHandler(err: Error, req: Request, res: Response, next: NextFunction) {

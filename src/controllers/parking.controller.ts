@@ -1,9 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import { connect } from "../database";
-import { BadRequestGeoBoxError, BadRequestGeoBoxOutOfBoundsError } from "../error";
+import { BadRequestError, BadRequestGeoBoxError, BadRequestGeoBoxOutOfBoundsError } from "../error";
 import { HttpStatus } from "../httpStatus";
 import { parking } from "../interfaces/parking.interface";
 import { boxArea } from "../interfaces/boxArea.interface";
+import { ClientsManager } from "../clientsManager";
+import { QueryResult } from "pg";
 
 
 //TODO: check if datatipe body can be aplied interface user
@@ -85,20 +87,39 @@ export async function getParkingsFromArea(req: Request, res: Response, next: Nex
 
         const conn = connect();
         //min_lon, min_lat, max_lon, max_lat, 4326
-        const result = await conn.query('SELECT gid, ST_AsGeoJSON(ST_Transform(geog::geometry, 4326)) AS latLong, ' +
-            'name, capacity, openhour, closehour, phone, rating' +
-            ' FROM parkings WHERE ST_Intersects(geog, ST_MakeEnvelope($1, $2, $3, $4, 4326))',
+        const result = await conn.query('SELECT gid, ST_X(ST_Transform(geog::geometry, 4326)) AS longitude, ' +
+            'ST_Y(ST_Transform(geog::geometry, 4326)) AS latitude, name, capacity, openhour, closehour, phone, ' +
+            'rating FROM parkings WHERE ST_Intersects(geog, ST_MakeEnvelope($1, $2, $3, $4, 4326))',
             [area.mLon, area.mLat, area.MLon, area.MLat]);
-
-        //TODO: only return {"lat": 10.4, "long": 34.5} in latLong from databse;
-        result.rows.forEach(r => {
-            let arr: number[] = JSON.parse(result.rows[0].latlong).coordinates;
-            r.latlong = { "lat": arr[0], "long": arr[1] };
-        });
 
         res.status(HttpStatus.OK).json(result.rows);
     } catch (err) {
         return next(err);
+    }
+}
+
+export async function modifieAttendance(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    try {
+        const parkingID = req.params.id;
+        const increase: boolean = req.body.increase;
+        const clientsManager: ClientsManager = req.body.appClients;
+        let connRes: QueryResult;
+
+        const conn = connect();
+        if (increase)
+            connRes = await conn.query('UPDATE parkings SET attendance = attendance + 1 WHERE gid = $1 RETURNING attendance',
+                [parkingID]);
+        else
+            connRes = await conn.query('UPDATE parkings SET attendance = attendance - 1 WHERE gid = $1 RETURNING attendance',
+                [parkingID]);
+
+        //rise event attendance modified
+        clientsManager.notifyClients(parseInt(parkingID), connRes.rows[0].attendance);
+
+
+        res.status(HttpStatus.OK).send('correctly updated');
+    } catch (err) {
+        next(err)
     }
 }
 
