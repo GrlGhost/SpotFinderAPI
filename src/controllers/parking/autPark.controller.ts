@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { BadRequestError } from "../error";
+import { BadRequestError } from "../../error";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { connect } from "../database";
+import { connect } from "../../database";
 import { QueryResultRow } from "pg";
-import { NotFoundError } from "../error";
-import { Unauthorize } from "../error";
+import { NotFoundError } from "../../error";
+import { Unauthorize } from "../../error";
 
 
 

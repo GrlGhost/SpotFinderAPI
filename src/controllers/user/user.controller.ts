@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
-import { connect } from "../database";
-import { BadRequestError, NotFoundError, PassWordMissMatch } from "../error";
-import { HttpStatus } from "../httpStatus";
-import { User } from "../interfaces/user.interfaces";
-import { session } from "../interfaces/session.interface";
+import { connect } from "../../database";
+import { BadRequestError, NotFoundError, PassWordMissMatch } from "../../error";
+import { HttpStatus } from "../../httpStatus";
+import { User } from "../../interfaces/user.interfaces";
+import { session } from "../../interfaces/session.interface";
 
 
 //TODO: check if datatipe body can be aplied interface user

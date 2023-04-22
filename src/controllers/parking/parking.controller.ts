@@ -1,11 +1,12 @@
 import { NextFunction, Request, Response } from "express";
-import { connect } from "../database";
-import { BadRequestError, BadRequestGeoBoxError, BadRequestGeoBoxOutOfBoundsError } from "../error";
-import { HttpStatus } from "../httpStatus";
-import { parking } from "../interfaces/parking.interface";
-import { boxArea } from "../interfaces/boxArea.interface";
-import { ClientsManager } from "../clientsManager";
+import { connect } from "../../database";
+import { BadRequestError, BadRequestGeoBoxError, BadRequestGeoBoxOutOfBoundsError } from "../../error";
+import { HttpStatus } from "../../httpStatus";
+import { parking } from "../../interfaces/parking.interface";
+import { boxArea } from "../../interfaces/boxArea.interface";
+import { ClientsManager } from "../../clientsManager";
 import { QueryResult } from "pg";
+import { modifieAttendance as modAttendanceAux } from "./parkingAux";
 
 
 //TODO: check if datatipe body can be aplied interface user
@@ -100,22 +101,8 @@ export async function getParkingsFromArea(req: Request, res: Response, next: Nex
 
 export async function modifieAttendance(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
-        const parkingID = req.params.id;
         const increase: boolean = req.body.increase;
-        const clientsManager: ClientsManager = req.body.appClients;
-        let connRes: QueryResult;
-
-        const conn = connect();
-        if (increase)
-            connRes = await conn.query('UPDATE parkings SET attendance = attendance + 1 WHERE gid = $1 RETURNING attendance',
-                [parkingID]);
-        else
-            connRes = await conn.query('UPDATE parkings SET attendance = attendance - 1 WHERE gid = $1 RETURNING attendance',
-                [parkingID]);
-
-        //rise event attendance modified
-        clientsManager.notifyClients(parseInt(parkingID), connRes.rows[0].attendance);
-
+        await modAttendanceAux(parseInt(req.params.id), increase, req.body.appClients);
 
         res.status(HttpStatus.OK).send('correctly updated');
     } catch (err) {
