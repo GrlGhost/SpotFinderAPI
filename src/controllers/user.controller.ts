@@ -26,7 +26,7 @@ export async function addUser(req: Request, res: Response, next: NextFunction): 
 
         const conn = connect();
         await conn.query('INSERT INTO users(username, mail, psw) VALUES($1, $2, $3)',
-            [newUser.userName, newUser.mail, hPsw]);
+            [newUser.username, newUser.mail, hPsw]);
 
         req.params = { "userMail": body.mail };
 
@@ -56,10 +56,17 @@ export async function logInUser(req: Request, res: Response, next: NextFunction)
         const pswMatch: Boolean = bcrypt.compareSync(req.body.psw, user.psw);
         if (!pswMatch) throw new PassWordMissMatch(true);
 
-        const sessionData: session = { userMail: user.mail, userName: user.userName };
+        const sessionData: session = { userMail: user.mail, userName: user.username };
         const token = jwt.sign(sessionData, 'SpotFinderSecretPSW105920',
             { 'expiresIn': '3h' });
-        res.status(HttpStatus.OK).send(token);
+
+
+        const data = {
+            "userMail": user.mail,
+            "userName": user.username,
+            "token": token
+        }
+        res.status(HttpStatus.OK).send(data);
     } catch (err) {
         next(err);
     }

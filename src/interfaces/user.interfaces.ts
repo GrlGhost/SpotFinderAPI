@@ -2,6 +2,6 @@
 
 export interface User {
     mail: string;
-    userName: string;
+    username: string;
     psw: string;
 } 
