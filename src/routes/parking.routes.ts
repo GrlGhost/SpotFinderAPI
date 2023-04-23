@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { addParking, deleteParking, getParkingsFromArea, modifieAttendance, modifieParking } from "../controllers/parking/parking.controller";
+import { addParking, deleteParking, getParkingsFromArea, getParkingsOfOwner, modifieAttendance, modifieParking } from "../controllers/parking/parking.controller";
 import { authForParkingOwner } from "../controllers/parking/autPark.controller";
 import { generateClient, subscribeToParkingLot, unsubscribeFromParkingLot } from "../controllers/event.controller";
 import { assertQR, makeReservation } from "../controllers/parking/qr.controller";
+import { authForUserActions } from "../controllers/user/authenticate.controller";
 
 
 const parkingRouter = Router();
@@ -31,6 +32,9 @@ parkingRouter.route('/:id/parkingReservation')
 parkingRouter.route('/:id')
     .post(authForParkingOwner, modifieParking)
     .delete(authForParkingOwner, deleteParking);
+
+parkingRouter.route('/:userMail')
+    .get(authForUserActions, getParkingsOfOwner);
 
 
 

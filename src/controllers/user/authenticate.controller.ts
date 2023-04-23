@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError, Unauthorize } from "../../error";
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt, { JwtPayload, JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
+import { HttpStatus } from "../../httpStatus";
+
 
 
 
@@ -23,6 +25,10 @@ export async function authForUserActions(req: Request, res: Response, next: Next
         } else throw new BadRequestError(true, 'params.userMail | body.mail');
 
     } catch (err) {
-        next(err);
+        if (typeof err === typeof TokenExpiredError)
+            res.status(HttpStatus.Unauthorised).send({ 'message': 'token expired', 'valid': false });
+        else if (typeof err === typeof JsonWebTokenError)
+            res.status(HttpStatus.Unauthorised).send({ 'message': 'invalid token by authentication or shape' });
+        else next(err);
     }
 }

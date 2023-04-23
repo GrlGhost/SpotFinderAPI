@@ -73,9 +73,17 @@ export async function deleteParking(req: Request, res: Response, next: NextFunct
     }
 }
 
-export async function getParkings(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+export async function getParkingsOfOwner(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
-        throw new Error("not implemented");
+        const usermail: string = req.params.userMail;
+
+        const conn = connect();
+        const qres: QueryResult = await conn.query('SELECT gid AS id, ST_X(ST_Transform(geog::geometry, 4326)) ' +
+            'longitude, ST_Y(ST_Transform(geog::geometry, 4326)) latitude, name, capacity, openhour,' +
+            ' closehour, phone, rating FROM parkings WHERE ownerMail = $1', [usermail]);
+        console.log("qres rows count: " + qres.rowCount);
+
+        res.status(HttpStatus.OK).send({ 'parkingsOwned': qres.rows });
     } catch (err) {
         return next(err);
     }
@@ -88,8 +96,8 @@ export async function getParkingsFromArea(req: Request, res: Response, next: Nex
 
         const conn = connect();
         //min_lon, min_lat, max_lon, max_lat, 4326
-        const result = await conn.query('SELECT gid, ST_X(ST_Transform(geog::geometry, 4326)) AS longitude, ' +
-            'ST_Y(ST_Transform(geog::geometry, 4326)) AS latitude, name, capacity, openhour, closehour, phone, ' +
+        const result = await conn.query('SELECT gid, ST_X(ST_Transform(geog::geometry, 4326)) longitude, ' +
+            'ST_Y(ST_Transform(geog::geometry, 4326)) latitude, name, capacity, openhour, closehour, phone, ' +
             'rating FROM parkings WHERE ST_Intersects(geog, ST_MakeEnvelope($1, $2, $3, $4, 4326))',
             [area.mLon, area.mLat, area.MLon, area.MLat]);
 
@@ -109,6 +117,8 @@ export async function modifieAttendance(req: Request, res: Response, next: NextF
         next(err)
     }
 }
+
+
 
 function assertBox(mLon: number, mLat: number, MLon: number, MLat: number) {
     if (mLon >= MLon) throw new BadRequestGeoBoxError(true, 'mLon', 'MLon');
