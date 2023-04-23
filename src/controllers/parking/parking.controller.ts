@@ -21,7 +21,7 @@ export async function addParking(req: Request, res: Response, next: NextFunction
             ['SRID=4326;POINT(' + newPark.lat + ' ' + newPark.lon + ')', newPark.name, newPark.capacity,
             newPark.openHour ? newPark.openHour : null, newPark.closeHour ? newPark.closeHour : null,
             newPark.phone ? newPark.phone : null, 0, newPark.ownerMail]);
-        return res.status(HttpStatus.OK).json({ response: 'Succesfuly created user' })
+        return res.status(HttpStatus.OK).json({ response: 'Succesfuly created parking' })
     } catch (err) {
         return next(err);
     }

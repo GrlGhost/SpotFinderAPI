@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError } from "../../error";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt, { JsonWebTokenError, JwtPayload, TokenExpiredError } from "jsonwebtoken";
 import { connect } from "../../database";
 import { QueryResultRow } from "pg";
 import { NotFoundError } from "../../error";
 import { Unauthorize } from "../../error";
+import { HttpStatus } from "../../httpStatus";
 
 
 
@@ -27,6 +28,10 @@ export async function authForParkingOwner(req: Request, res: Response, next: Nex
 
         next();
     } catch (err) {
-        next(err);
+        if (err instanceof TokenExpiredError)
+            res.status(HttpStatus.Unauthorised).send({ 'message': 'token expired', 'valid': false });
+        else if (err instanceof JsonWebTokenError)
+            res.status(HttpStatus.Unauthorised).send({ 'message': 'invalid token by authentication or shape' });
+        else next(err);
     }
 }
