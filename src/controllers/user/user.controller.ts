@@ -6,8 +6,9 @@ import { BadRequestError, NotFoundError, PassWordMissMatch } from "../../error";
 import { HttpStatus } from "../../httpStatus";
 import { User } from "../../interfaces/user.interfaces";
 import { session } from "../../interfaces/session.interface";
+import { DatabaseError } from "pg";
 
-
+//TODO: close conections when finished.
 //TODO: check if datatipe body can be aplied interface user
 export async function addUser(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     //adds an user to the database
@@ -15,7 +16,7 @@ export async function addUser(req: Request, res: Response, next: NextFunction): 
         const body = req.body;
         console.log("Analizing body");
         if (body.mail == null) throw new BadRequestError(true, 'mail');
-        else if (body.userName == null) throw new BadRequestError(true, 'userName');
+        else if (body.username == null) throw new BadRequestError(true, 'username');
         else if (body.psw == null) throw new BadRequestError(true, 'psw');
 
         console.log("Body verified");
@@ -32,7 +33,25 @@ export async function addUser(req: Request, res: Response, next: NextFunction): 
 
         next();
     } catch (err) {
-        return next(err);
+        if (err instanceof DatabaseError) {
+            console.log('reached here');
+
+            const dErr: DatabaseError = err as DatabaseError;
+            if (dErr.code === '23505') {
+                if (dErr.constraint === 'users_pkey') res.status(HttpStatus.Conflict).send({
+                    'message': 'the mail was already taken if you want to log in acces to the log in endpoint',
+                    'parameter': 'mail',
+                    'value': req.body.mail
+                });
+                else if (dErr.constraint === 'users_username_key') res.status(HttpStatus.Conflict).send({
+                    'message': 'the user name was already taken',
+                    'parameter': 'username',
+                    'value': req.body.username
+                })
+                else return next(err);
+            }
+        }
+        else return next(err);
     }
 }
 

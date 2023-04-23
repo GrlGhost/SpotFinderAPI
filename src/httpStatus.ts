@@ -4,5 +4,6 @@ export enum HttpStatus {
     Unauthorised = 401,
     Forbiden = 403,
     NotFound = 404,
+    Conflict = 409,
     InternalServerError = 500
 }
