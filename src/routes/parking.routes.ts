@@ -26,7 +26,9 @@ parkingRouter.route('/:id/modifieAttendance')
     .post(modifieAttendance);
 
 parkingRouter.route('/:id/parkingReservation')
-    .post(makeReservation)
+    .post(makeReservation);
+
+parkingRouter.route('/:token/parkingReservation')
     .get(assertQR);
 
 parkingRouter.route('/:id')

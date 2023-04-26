@@ -17,7 +17,7 @@ export async function makeReservation(req: Request, res: Response, next: NextFun
 
         //make a token for the qr
         const token: string = sign(qrData, 'SpotFinderQrPasword_325fsdao',
-            { 'expiresIn': '3m', 'issuer': 'SpFdAPIqrGenerator' });
+            { 'expiresIn': '600s', 'issuer': 'SpFdAPIqrGenerator' });
         //send the token
         res.status(HttpStatus.OK).send({ 'token': token });
     } catch (err) {
