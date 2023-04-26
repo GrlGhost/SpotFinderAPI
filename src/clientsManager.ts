@@ -26,8 +26,6 @@ export class ClientsManager {
     }
 
     public notifyClients(key: number, attendace: number) {
-        console.log("Attendance: " + attendace);
-
         const data = { "key": key, "attendance": attendace }
         const eventData = `data: ${JSON.stringify(data)}\n\n`;
 

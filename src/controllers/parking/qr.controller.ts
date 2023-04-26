@@ -3,13 +3,15 @@ import { modifieAttendance } from "./parkingAux";
 import { JwtPayload, sign, verify, TokenExpiredError, JsonWebTokenError } from "jsonwebtoken";
 import { HttpStatus } from "../../httpStatus";
 import { qrData } from "../../interfaces/qrData.interface";
+import { ClientsManager } from "../../clientsManager";
 
 export async function makeReservation(req: Request, res: Response, next: NextFunction) {
     try {
+        const appClient: ClientsManager = req.body.appClients;
         //increase counter in database and notify clients.
-        await modifieAttendance(parseInt(req.params.id), true, req.body.appClients);
+        await modifieAttendance(parseInt(req.params.id), true, appClient);
         //@ts-ignore
-        const timeIdaux: NodeJS.Timeout = setTimeout(modifieAttendance, 5000, req.params.id, false, req.body.appClient);
+        const timeIdaux: NodeJS.Timeout = setTimeout(modifieAttendance, 300000, req.params.id, false, appClient);
         const timeId: number = timeIdaux[Symbol.toPrimitive]()
         const qrData: qrData = { userMail: req.body.userMail, timeId: timeId };
 
