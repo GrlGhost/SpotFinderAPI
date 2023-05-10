@@ -13,7 +13,7 @@ parkingRouter.route('/')
     .post(addParking);
 
 parkingRouter.route('/parkingsFromArea')
-    .get(getParkingsFromArea);
+    .post(getParkingsFromArea);
 
 parkingRouter.route('/events')
     .post(generateClient);
