@@ -9,6 +9,8 @@ import cors from "cors";
 import parkingRouter from "./routes/parking.routes";
 import { addClients } from "./controllers/addClients.controller";
 import { ClientsManager } from "./clientsManager";
+import { ReservManager } from "./reservManager";
+import { addReservManager } from "./controllers/addReservEventManager";
 
 
 
@@ -16,9 +18,11 @@ export class App {
     private app: Application;
     private errorHandler: ErrorHandler;
     private appClients: ClientsManager;
+    private rvManager: ReservManager;
 
     constructor(port: number) {
         this.appClients = new ClientsManager();
+        this.rvManager = new ReservManager();
         this.errorHandler = new ErrorHandler();
 
         this.app = express();
@@ -58,7 +62,7 @@ export class App {
     private routes() {
         this.app.use(indexRoutes);
         this.app.use('/users', usersRouter);
-        this.app.use('/parkings', addClients(this.appClients), parkingRouter);
+        this.app.use('/parkings', addClients(this.appClients), addReservManager(this.rvManager), parkingRouter);
     }
 
     private async middlewareErrorHandler(err: Error, req: Request, res: Response, next: NextFunction) {

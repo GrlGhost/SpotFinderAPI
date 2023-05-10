@@ -2,6 +2,7 @@ import { QueryResult } from "pg";
 import { ClientsManager } from "../../clientsManager";
 import { connect } from "../../database";
 
+//TODO: manage chk_attendance error
 export async function modifieAttendance(parkId: number, increase: boolean, clManager: ClientsManager) {
     let connRes: QueryResult;
     const conn = connect();
