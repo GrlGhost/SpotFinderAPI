@@ -18,7 +18,7 @@ export async function addParking(req: Request, res: Response, next: NextFunction
         const conn = connect();
         await conn.query('INSERT INTO parkings(geog, name, capacity, openHour, closeHour, phone, rating, ownermail)'
             + 'VALUES($1, $2, $3, $4, $5, $6, $7, $8)',
-            ['SRID=4326;POINT(' + newPark.lat + ' ' + newPark.lon + ')', newPark.name, newPark.capacity,
+            ['SRID=4326;POINT(' + newPark.lon + ' ' + newPark.lat + ')', newPark.name, newPark.capacity,
             newPark.openHour ? newPark.openHour : null, newPark.closeHour ? newPark.closeHour : null,
             newPark.phone ? newPark.phone : null, 0, newPark.ownerMail]);
         return res.status(HttpStatus.OK).json({ response: 'Succesfuly created parking' })
