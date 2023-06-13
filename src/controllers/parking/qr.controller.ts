@@ -5,6 +5,7 @@ import { HttpStatus } from "../../httpStatus";
 import { qrData } from "../../interfaces/qrData.interface";
 import { ClientsManager } from "../../clientsManager";
 import { ReservManager } from "../../reservManager";
+import { addUserToParkAt, setEntryTime } from "../../userParkedAt";
 
 //TODO: same user can't make multiple reservations
 export async function makeReservation(req: Request, res: Response, next: NextFunction) {
@@ -12,9 +13,9 @@ export async function makeReservation(req: Request, res: Response, next: NextFun
         const appClient: ClientsManager = req.body.appClients;
         const rvManager: ReservManager = req.body.rvManager;
         //increase counter in database and notify clients.
-        await modifieAttendance(parseInt(req.params.id), true, appClient);
+        await modifieAttendance(parseInt(req.params.id), req.body.userMail, true, true, appClient);
         //@ts-ignore
-        const timeIdaux: NodeJS.Timeout = setTimeout(modifieAttendance, 300000, req.params.id, false, appClient);
+        const timeIdaux: NodeJS.Timeout = setTimeout(modifieAttendance, 600000, req.params.id, req.body.userMail, false, false, appClient);
         const timeId: number = timeIdaux[Symbol.toPrimitive]()
         const qrData: qrData = { parkingId: parseInt(req.params.id), userMail: req.body.userMail, timeId: timeId };
 
@@ -42,6 +43,8 @@ export async function assertQR(req: Request, res: Response, next: NextFunction) 
             { 'issuer': 'SpFdAPIqrGenerator' }) as JwtPayload;
 
         clearTimeout(tokenData.timeId);
+        setEntryTime(tokenData.userMail);
+
         res.status(HttpStatus.OK).send({ 'message': 'qr validated', 'valid': true, 'userMail': tokenData.userMail });
     } catch (err) {
         if (err instanceof TokenExpiredError)
@@ -63,7 +66,7 @@ export async function cancelReservation(req: Request, res: Response, next: NextF
             { 'issuer': 'SpFdAPIqrGenerator' }) as JwtPayload & qrData;
 
         clearTimeout(tokenData.timeId);
-        modifieAttendance(tokenData.parkingId, false, appClients);
+        modifieAttendance(tokenData.parkingId, tokenData.userMail, false, false, appClients);
 
         rvManager.notifyReservationCanceled(tokenData.parkingId, tokenData.userMail);
 

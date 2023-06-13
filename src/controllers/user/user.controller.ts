@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
 import { connect } from "../../database";
-import { BadRequestError, NotFoundError, PassWordMissMatch } from "../../error";
+import { BadRequestError, Conflict, NotFoundError, PassWordMissMatch } from "../../error";
 import { HttpStatus } from "../../httpStatus";
 import { User } from "../../interfaces/user.interfaces";
 import { session } from "../../interfaces/session.interface";
@@ -38,20 +38,25 @@ export async function addUser(req: Request, res: Response, next: NextFunction): 
 
             const dErr: DatabaseError = err as DatabaseError;
             if (dErr.code === '23505') {
-                if (dErr.constraint === 'users_pkey') res.status(HttpStatus.Conflict).send({
-                    'message': 'the mail was already taken if you want to log in acces to the log in endpoint',
-                    'parameter': 'mail',
-                    'value': req.body.mail
-                });
-                else if (dErr.constraint === 'users_username_key') res.status(HttpStatus.Conflict).send({
+                if (dErr.constraint === 'users_pkey') return next(new Conflict(true, 
+                    'The mail was already taken, if you want to log in acces to the log in endpoint',
+                    'mail', req.body.mail));
+                //res.status(HttpStatus.Conflict).send({
+                //  'message': 'the mail was already taken if you want to log in acces to the log in endpoint',
+                //  'parameter': 'mail',
+                //  'value': req.body.mail
+                //});
+                if (dErr.constraint === 'users_username_key')  return next(new Conflict(true, 
+                    'The user name was already taken', 'username', req.body.username));
+                /* res.status(HttpStatus.Conflict).send({
                     'message': 'the user name was already taken',
                     'parameter': 'username',
                     'value': req.body.username
-                })
-                else return next(err);
+                }) */
             }
+
         }
-        else return next(err);
+        return next(err);
     }
 }
 

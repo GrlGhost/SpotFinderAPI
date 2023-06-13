@@ -110,7 +110,8 @@ export async function getParkingsFromArea(req: Request, res: Response, next: Nex
 export async function modifieAttendance(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
         const increase: boolean = req.body.increase;
-        await modAttendanceAux(parseInt(req.params.id), increase, req.body.appClients);
+        const userMail: string | null = req.body.userMail;
+        await modAttendanceAux(parseInt(req.params.id), userMail, increase, false, req.body.appClients);
 
         res.status(HttpStatus.OK).send('correctly updated');
     } catch (err) {

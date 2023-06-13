@@ -140,5 +140,29 @@ export class Unauthorize extends ErrorRest {
             'action': this.cause
         };
     }
+}
 
+export class Conflict extends ErrorRest{
+    public readonly cause;
+    public readonly parameter;
+    public readonly value;
+
+    constructor(operational: boolean, cause: string, parameter: string, value: string) {
+        super({ status: HttpStatus.Conflict, message: 'A conflict happened the cuse is: ' + cause })
+        this.cause = cause;
+        this.parameter = parameter;
+        this.value = value;
+        this.name = Conflict.name;
+    }
+
+    public override serializeError(): {} {
+        return {
+            'name': this.name,
+            'status': this.status,
+            'message': this.message,
+            'action': this.cause,
+            'parameter': this.parameter,
+            'value': this.value
+        };
+    }
 }
