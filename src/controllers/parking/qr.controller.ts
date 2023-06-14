@@ -77,3 +77,22 @@ export async function cancelReservation(req: Request, res: Response, next: NextF
         else next(err);
     }
 }
+
+/* 
+This method check that the token was issued by the correct authority and extracts the user from it adding it to the body.
+*/
+export async function assertAndAddUserFromUserAtParking(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    try {
+        const token: string = req.params.token;
+        const tokenData: JwtPayload = verify(token, 'SpotFinderQrPasword_325fsdao',
+            { 'issuer': 'SpFdAPIUserParkedAt' }) as JwtPayload;
+
+        req.body.userMail = tokenData.userMail;
+        req.body.increase = false;
+        next();
+    } catch (err) {
+        if (err instanceof JsonWebTokenError)
+            res.status(HttpStatus.Unauthorised).send({ 'message': 'invalid token by authentication or shape' });
+        else next(err);
+    }
+}

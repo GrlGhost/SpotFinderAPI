@@ -2,7 +2,7 @@ import { Router } from "express";
 import { addParking, deleteParking, getParkingsFromArea, getParkingsOfOwner, modifieAttendance, modifieParking } from "../controllers/parking/parking.controller";
 import { authForParkingOwner } from "../controllers/parking/autPark.controller";
 import { generateClient, subscribeToParkingLot, unsubscribeFromParkingLot } from "../controllers/event.controller";
-import { assertQR, makeReservation } from "../controllers/parking/qr.controller";
+import { assertAndAddUserFromUserAtParking, assertQR, makeReservation } from "../controllers/parking/qr.controller";
 import { authForUserActions } from "../controllers/user/authenticate.controller";
 import { generateReservListener, startListeneningReservsOfParking, stopListenengReservOfParkings } from "../controllers/reservListener.controllers";
 import { getUsersAtParking } from "../controllers/userParkedAt.controller";
@@ -31,6 +31,9 @@ parkingRouter.route('/reservationListener')
 parkingRouter.route('/reservationListener/:ids')
     .post(startListeneningReservsOfParking)
     .delete(stopListenengReservOfParkings)
+
+parkingRouter.route('/:id/:token/userExit')
+    .get(assertAndAddUserFromUserAtParking, modifieAttendance);
 
 //TODO: add auth middleware
 parkingRouter.route('/:id/modifieAttendance')

@@ -107,6 +107,8 @@ export async function getParkingsFromArea(req: Request, res: Response, next: Nex
     }
 }
 
+
+//TODO: this endpoint should not be so open to get users for mail user. The user should be pass by qr (previos endpoint)
 export async function modifieAttendance(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
         const increase: boolean = req.body.increase;
