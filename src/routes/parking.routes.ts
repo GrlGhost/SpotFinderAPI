@@ -5,6 +5,7 @@ import { generateClient, subscribeToParkingLot, unsubscribeFromParkingLot } from
 import { assertQR, makeReservation } from "../controllers/parking/qr.controller";
 import { authForUserActions } from "../controllers/user/authenticate.controller";
 import { generateReservListener, startListeneningReservsOfParking, stopListenengReservOfParkings } from "../controllers/reservListener.controllers";
+import { getUsersAtParking } from "../controllers/userParkedAt.controller";
 
 
 const parkingRouter = Router();
@@ -37,6 +38,9 @@ parkingRouter.route('/:id/modifieAttendance')
 
 parkingRouter.route('/:id/parkingReservation')
     .post(makeReservation);
+
+parkingRouter.route('/:id/usersAtParking')
+    .get(getUsersAtParking);
 
 parkingRouter.route('/:token/parkingReservation')
     .get(assertQR);

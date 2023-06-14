@@ -35,3 +35,14 @@ export async function getWhereUserIsParking(req: Request, res: Response, next: N
     }
 }
 
+export async function getUsersAtParking(req: Request, res: Response, next: NextFunction) {
+    try{
+        const conn = connect();
+        const response = await conn.query('SELECT * FROM user_parked_at WHERE parkinggid = $1', [req.params.id]);
+
+        res.status(HttpStatus.OK).send(response.rows)
+    }catch(err){
+        next(err);
+    }
+}
+
