@@ -6,6 +6,7 @@ import { qrData } from "../../interfaces/qrData.interface";
 import { ClientsManager } from "../../clientsManager";
 import { ReservManager } from "../../reservManager";
 import { addUserToParkAt, setEntryTime } from "../../userParkedAt";
+import { Unauthorize } from "../../error";
 
 //TODO: same user can't make multiple reservations
 export async function makeReservation(req: Request, res: Response, next: NextFunction) {
@@ -39,11 +40,14 @@ export async function makeReservation(req: Request, res: Response, next: NextFun
 export async function assertQR(req: Request, res: Response, next: NextFunction) {
     try {
         const token: string = req.params.token;
+        const parkigID: number = parseInt(req.params.parkingID);
         const tokenData: JwtPayload = verify(token, 'SpotFinderQrPasword_325fsdao',
             { 'issuer': 'SpFdAPIqrGenerator' }) as JwtPayload;
 
         clearTimeout(tokenData.timeId);
         setEntryTime(tokenData.userMail);
+        
+        if (parkigID !== tokenData.parkingId) throw new Unauthorize(true, 'parking doesnt match');
 
         res.status(HttpStatus.OK).send({ 'message': 'qr validated', 'valid': true, 'userMail': tokenData.userMail });
     } catch (err) {

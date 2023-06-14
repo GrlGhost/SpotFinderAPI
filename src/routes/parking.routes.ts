@@ -53,7 +53,7 @@ parkingRouter.route('/:id/parkingReservation')
 parkingRouter.route('/:id/usersAtParking')
     .get(getUsersAtParking);
 
-parkingRouter.route('/:token/parkingReservation')
+parkingRouter.route('/:token/:parkingID/parkingReservation')
     .get(assertQR);
 
 
