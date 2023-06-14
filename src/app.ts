@@ -11,6 +11,7 @@ import { addClients } from "./controllers/addClients.controller";
 import { ClientsManager } from "./clientsManager";
 import { ReservManager } from "./reservManager";
 import { addReservManager } from "./controllers/addReservEventManager";
+import calificationsRouter from "./routes/califications.routes";
 
 
 
@@ -63,6 +64,7 @@ export class App {
         this.app.use(indexRoutes);
         this.app.use('/users', usersRouter);
         this.app.use('/parkings', addClients(this.appClients), addReservManager(this.rvManager), parkingRouter);
+        this.app.use('/califications', calificationsRouter);
     }
 
     private async middlewareErrorHandler(err: Error, req: Request, res: Response, next: NextFunction) {
