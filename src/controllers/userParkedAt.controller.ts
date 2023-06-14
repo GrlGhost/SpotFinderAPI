@@ -15,8 +15,9 @@ export async function getWhereUserIsParking(req: Request, res: Response, next: N
         if (rpUsersParked.rowCount == 0) throw new NotFoundError(true, 'userMail');
 
 
-        const rpParkings = await conn.query('SELECT gid AS id, ST_X(ST_Transform(geog::geometry, 4326)) longitude,'+
-        ' ST_Y(ST_Transform(geog::geometry, 4326)) latitude, name, phone FROM parkings WHERE gid = $1', [rpUsersParked.rows[0].parkinggid]);
+        const rpParkings = await conn.query('SELECT gid AS id, ST_X(ST_Transform(geog::geometry, 4326)) longitude, ' +
+        'ST_Y(ST_Transform(geog::geometry, 4326)) latitude, name, capacity, openhour, closehour, phone, ' +
+        'rating, attendance FROM parkings WHERE gid = $1', [rpUsersParked.rows[0].parkinggid]);
 
         if (rpParkings.rowCount == 0) throw new NotFoundError(false, 'gid');
 
