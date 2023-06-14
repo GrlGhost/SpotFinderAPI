@@ -80,7 +80,7 @@ export async function getParkingsOfOwner(req: Request, res: Response, next: Next
         const conn = connect();
         const qres: QueryResult = await conn.query('SELECT gid AS id, ST_X(ST_Transform(geog::geometry, 4326)) ' +
             'longitude, ST_Y(ST_Transform(geog::geometry, 4326)) latitude, name, capacity, openhour,' +
-            ' closehour, phone, rating FROM parkings WHERE ownerMail = $1', [usermail]);
+            ' closehour, phone, rating, attendance FROM parkings WHERE ownerMail = $1', [usermail]);
         console.log("qres rows count: " + qres.rowCount);
 
         res.status(HttpStatus.OK).send({ 'parkingsOwned': qres.rows });
