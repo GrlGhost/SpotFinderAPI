@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { connect } from "../../database";
-import { BadRequestError, BadRequestGeoBoxError, BadRequestGeoBoxOutOfBoundsError } from "../../error";
+import { BadRequestError, BadRequestGeoBoxError, BadRequestGeoBoxOutOfBoundsError, NotFoundError } from "../../error";
 import { HttpStatus } from "../../httpStatus";
 import { parking } from "../../interfaces/parking.interface";
 import { boxArea } from "../../interfaces/boxArea.interface";
@@ -118,6 +118,21 @@ export async function modifieAttendance(req: Request, res: Response, next: NextF
         res.status(HttpStatus.OK).send('correctly updated');
     } catch (err) {
         next(err)
+    }
+}
+
+export async function getAllInfoOfParking(req: Request, res: Response, next: NextFunction){
+    try{
+        const conn = connect();
+        const response = await conn.query('SELECT gid AS id, ST_X(ST_Transform(geog::geometry, 4326)) longitude, ' +
+        'ST_Y(ST_Transform(geog::geometry, 4326)) latitude, name, capacity, openhour, closehour, phone, ' +
+        'rating, attendance FROM parkings WHERE gid = $1', [req.params.id]);
+        
+        if (response.rowCount == 0) throw new NotFoundError(true, 'id');
+
+        res.status(HttpStatus.OK).send(response.rows[0]);
+    } catch (err) {
+        next(err);
     }
 }
 

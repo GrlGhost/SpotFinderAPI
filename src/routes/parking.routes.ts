@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addParking, deleteParking, getParkingsFromArea, getParkingsOfOwner, modifieAttendance, modifieParking } from "../controllers/parking/parking.controller";
+import { addParking, deleteParking, getAllInfoOfParking, getParkingsFromArea, getParkingsOfOwner, modifieAttendance, modifieParking } from "../controllers/parking/parking.controller";
 import { authForParkingOwner } from "../controllers/parking/autPark.controller";
 import { generateClient, subscribeToParkingLot, unsubscribeFromParkingLot } from "../controllers/event.controller";
 import { assertAndAddUserFromUserAtParking, assertQR, makeReservation } from "../controllers/parking/qr.controller";
@@ -50,6 +50,7 @@ parkingRouter.route('/:token/parkingReservation')
 
 parkingRouter.route('/:id')
     .post(authForParkingOwner, modifieParking)
+    .get(getAllInfoOfParking)
     .delete(authForParkingOwner, deleteParking);
 
 parkingRouter.route('/:userMail')
