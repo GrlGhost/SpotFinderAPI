@@ -30,7 +30,15 @@ parkingRouter.route('/reservationListener')
 //TODO: auth of owner or manager
 parkingRouter.route('/reservationListener/:ids')
     .post(startListeneningReservsOfParking)
-    .delete(stopListenengReservOfParkings)
+    .delete(stopListenengReservOfParkings);
+
+parkingRouter.route('/ownedParkings/:userMail')
+    .get(authForUserActions, getParkingsOfOwner);
+
+parkingRouter.route('/manageParkings/:id')
+    .post(authForParkingOwner, modifieParking)
+    .get(getAllInfoOfParking)
+    .delete(authForParkingOwner, deleteParking);
 
 parkingRouter.route('/:id/:token/userExit')
     .get(assertAndAddUserFromUserAtParking, modifieAttendance);
@@ -48,13 +56,9 @@ parkingRouter.route('/:id/usersAtParking')
 parkingRouter.route('/:token/parkingReservation')
     .get(assertQR);
 
-parkingRouter.route('/:id')
-    .post(authForParkingOwner, modifieParking)
-    .get(getAllInfoOfParking)
-    .delete(authForParkingOwner, deleteParking);
 
-parkingRouter.route('/:userMail')
-    .get(authForUserActions, getParkingsOfOwner);
+
+
 
 
 
