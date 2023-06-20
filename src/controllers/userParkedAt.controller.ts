@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { connect } from "../database";
-import { BadRequestError, NotFoundError } from "../error";
+import { BadRequestError, Conflict, NotFoundError } from "../error";
 import { HttpStatus } from "../httpStatus";
 import { sign } from "jsonwebtoken";
+import { DatabaseError } from "pg";
 
 
 
@@ -32,6 +33,12 @@ export async function getWhereUserIsParking(req: Request, res: Response, next: N
         });
         
     }catch(err){
+        if (err instanceof DatabaseError){
+            const dErr: DatabaseError = err as DatabaseError;
+            if (dErr.code === '23505')
+                if (dErr.constraint === 'unique_user_park_at')
+                    return next(new Conflict(true, 'User parked or reserved at another parking', 'userMail', req.params.userMail));
+        }
         return next(err);
     }
 }

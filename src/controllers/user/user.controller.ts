@@ -41,18 +41,8 @@ export async function addUser(req: Request, res: Response, next: NextFunction): 
                 if (dErr.constraint === 'users_pkey') return next(new Conflict(true, 
                     'The mail was already taken, if you want to log in acces to the log in endpoint',
                     'mail', req.body.mail));
-                //res.status(HttpStatus.Conflict).send({
-                //  'message': 'the mail was already taken if you want to log in acces to the log in endpoint',
-                //  'parameter': 'mail',
-                //  'value': req.body.mail
-                //});
                 if (dErr.constraint === 'users_username_key')  return next(new Conflict(true, 
                     'The user name was already taken', 'username', req.body.username));
-                /* res.status(HttpStatus.Conflict).send({
-                    'message': 'the user name was already taken',
-                    'parameter': 'username',
-                    'value': req.body.username
-                }) */
             }
 
         }

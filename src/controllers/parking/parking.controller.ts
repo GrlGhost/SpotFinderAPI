@@ -4,7 +4,6 @@ import { BadRequestError, BadRequestGeoBoxError, BadRequestGeoBoxOutOfBoundsErro
 import { HttpStatus } from "../../httpStatus";
 import { parking } from "../../interfaces/parking.interface";
 import { boxArea } from "../../interfaces/boxArea.interface";
-import { ClientsManager } from "../../clientsManager";
 import { QueryResult } from "pg";
 import { modifieAttendance as modAttendanceAux } from "./parkingAux";
 
@@ -81,7 +80,6 @@ export async function getParkingsOfOwner(req: Request, res: Response, next: Next
         const qres: QueryResult = await conn.query('SELECT gid AS id, ST_X(ST_Transform(geog::geometry, 4326)) ' +
             'longitude, ST_Y(ST_Transform(geog::geometry, 4326)) latitude, name, capacity, openhour,' +
             ' closehour, phone, rating, attendance FROM parkings WHERE ownerMail = $1', [usermail]);
-        console.log("qres rows count: " + qres.rowCount);
 
         res.status(HttpStatus.OK).send({ 'parkingsOwned': qres.rows });
     } catch (err) {

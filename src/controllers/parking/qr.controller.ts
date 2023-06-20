@@ -5,7 +5,7 @@ import { HttpStatus } from "../../httpStatus";
 import { qrData } from "../../interfaces/qrData.interface";
 import { ClientsManager } from "../../clientsManager";
 import { ReservManager } from "../../reservManager";
-import { addUserToParkAt, setEntryTime } from "../../userParkedAt";
+import { setEntryTime } from "../../userParkedAt";
 import { Unauthorize } from "../../error";
 
 //TODO: same user can't make multiple reservations
