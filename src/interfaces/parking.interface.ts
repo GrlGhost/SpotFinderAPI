@@ -8,4 +8,5 @@ export interface parking {
     closeHour?: string;
     phone?: string;
     id?: number;
+    pricexminute?: number;
 }
