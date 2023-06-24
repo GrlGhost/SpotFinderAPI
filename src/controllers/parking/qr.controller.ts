@@ -93,6 +93,7 @@ export async function assertAndAddUserFromUserAtParking(req: Request, res: Respo
 
         req.body.userMail = tokenData.userMail;
         req.body.increase = false;
+        req.body.automatedExit = true;
         next();
     } catch (err) {
         if (err instanceof JsonWebTokenError)

@@ -6,6 +6,7 @@ import { parking } from "../../interfaces/parking.interface";
 import { boxArea } from "../../interfaces/boxArea.interface";
 import { QueryResult } from "pg";
 import { modifieAttendance as modAttendanceAux } from "./parkingAux";
+import { sendMoney } from "../Balance/balanceAux";
 
 
 //TODO: check if datatipe body can be aplied interface user
@@ -107,11 +108,36 @@ export async function getParkingsFromArea(req: Request, res: Response, next: Nex
 
 
 //TODO: this endpoint should not be so open to get users for mail user. The user should be pass by qr (previos endpoint)
+//TODO: before setting down the attendance without mail, should check if there was someone that entered without mail, 
+//could be an extra column in parking
 export async function modifieAttendance(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
+        if (!req.body.userMail) throw new BadRequestError(true, 'userMail');
         const increase: boolean = req.body.increase;
-        const userMail: string | null = req.body.userMail;
+        const userMail: string = req.body.userMail;
         await modAttendanceAux(parseInt(req.params.id), userMail, increase, false, req.body.appClients);
+
+        if (req.body.automatedExit){
+            //TODO: complete this method, shold get the amount to pay previously
+            throw new Error('The method must be completed')
+            const conn = connect();
+            const qRes: QueryResult = await conn.query('SELECT ownermail FROM parkings WHERE gid = $1', [req.params.id]);
+            if (qRes.rowCount === 0) throw new NotFoundError(true, 'id');
+
+            const qRes2: QueryResult = await conn.query('SELECT entryhourutc FROM user_parked_at WHERE usermail = $1', [userMail]);
+            if (qRes2.rowCount === 0) throw new NotFoundError(true, 'userMail');
+
+            const timeEntry: number[] = (qRes2.rows[0].entryhourutc as string).split(':').map(parseInt);
+
+            const date: Date = new Date();
+            const time: number[] = [date.getUTCHours(), date.getMinutes()];
+
+            //Calculate time of stay
+            let minutes = time[1]-timeEntry[1];
+            minutes = (time[0]-timeEntry[0])*60;
+
+            sendMoney(userMail, qRes.rows[0].ownermail, 100*minutes);   
+        }
 
         res.status(HttpStatus.OK).send('correctly updated');
     } catch (err) {
