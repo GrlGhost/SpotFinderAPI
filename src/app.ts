@@ -58,7 +58,6 @@ export class App {
         this.app.use(morgan('dev'));
         this.app.use(express.urlencoded({ extended: false })); //this is necesary
         this.app.use(express.json());
-        this.app.use(this.middleWareExample)
     }
 
     private routes() {
@@ -82,14 +81,6 @@ export class App {
             return res.status(HttpStatus.InternalServerError).send('Internal server error');
         }
     }
-
-    private middleWareExample(req: Request, res: Response, next: NextFunction) {
-        console.log("passed by middleware example");
-        next();
-    }
-
-
-
     //#endregion
 }
 
