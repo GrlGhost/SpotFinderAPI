@@ -148,12 +148,12 @@ export async function getParkingsFromArea(req: Request, res: Response, next: Nex
 //TODO: create a full table of price x time
 export async function modifieAttendance(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
-        if (!req.body.userMail) throw new BadRequestError(true, 'userMail');
         const increase: boolean = req.body.increase;
-        const userMail: string = req.body.userMail;
+        const userMail: string | null = req.body.userMail;
         await modAttendanceAux(parseInt(req.params.id), userMail, increase, false, req.body.appClients);
 
         if (req.body.automatedExit){
+            if (userMail === null) throw new Error('Unexpected error, automated exit without mail');
             const conn = connect();
             const qRes: QueryResult = await conn.query('SELECT ownermail, pricexminute FROM parkings WHERE gid = $1', [req.params.id]);
             if (qRes.rowCount === 0) throw new NotFoundError(true, 'id');
