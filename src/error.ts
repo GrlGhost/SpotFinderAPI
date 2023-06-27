@@ -40,6 +40,26 @@ export class BadRequestError extends ErrorRest {
 
 }
 
+export class PersonalizedBadRequestError extends ErrorRest {
+    public readonly propertyName;
+
+    constructor(operational: boolean, message: string, propertyName: string) {
+        super({ status: HttpStatus.BadRequest, message: message + propertyName })
+        this.propertyName = propertyName;
+        this.name = BadRequestError.name;
+    }
+
+    public override serializeError(): {} {
+        return {
+            'name': this.name,
+            'status': this.status,
+            'message': this.message,
+            'property': this.propertyName
+        };
+    }
+
+}
+
 export class NotFoundError extends ErrorRest {
     public readonly propertyName: string;
 

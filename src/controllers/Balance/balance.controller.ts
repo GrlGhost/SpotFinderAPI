@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { BadRequestError, ErrorRest, NotFoundError } from "../../error";
+import { BadRequestError, ErrorRest, NotFoundError, PersonalizedBadRequestError } from "../../error";
 import { connect } from "../../database";
 import { HttpStatus } from "../../httpStatus";
 
@@ -7,9 +7,7 @@ export async function addBalance(req: Request, res: Response, next: NextFunction
     try{
         if (!req.body.balance) throw new BadRequestError(true, 'balance');
         if (req.body.balance <= 0) {
-            const status: number = HttpStatus['BadRequest'];
-            const message: string = 'Not balid balance to add';
-            throw new ErrorRest({status, message});
+            throw new PersonalizedBadRequestError(true, 'Not valid balance to add in property', 'balance');
         }
 
         const conn = connect();
