@@ -108,8 +108,6 @@ export async function getParkingsFromArea(req: Request, res: Response, next: Nex
 
 
 //TODO: this endpoint should not be so open to get users for mail user. The user should be pass by qr (previos endpoint)
-//TODO: before setting down the attendance without mail, should check if there was someone that entered without mail, 
-//could be an extra column in parking
 //TODO: create a full table of price x time
 export async function modifieAttendance(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {

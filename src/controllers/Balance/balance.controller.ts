@@ -21,3 +21,14 @@ export async function addBalance(req: Request, res: Response, next: NextFunction
         next(err);
     }
 }
+
+export async function getBalance(req: Request, res: Response, next: NextFunction){
+    try{
+        const conn = connect();
+        const qRes = await conn.query('SELECT balance FROM balance WHERE mail = $1', [req.params.mail]);
+        if (qRes.rowCount === 0) res.status(HttpStatus.OK).send({balance: 0, message: 'operation made succesefully'});
+        else res.status(HttpStatus.OK).send({balance: qRes.rows[0].balance, message: 'operationn made succesfully'});
+    }catch(err){
+        next(err);
+    }
+}
