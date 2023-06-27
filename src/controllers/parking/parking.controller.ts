@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { connect } from "../../database";
-import { BadRequestError, BadRequestGeoBoxError, BadRequestGeoBoxOutOfBoundsError, NotFoundError } from "../../error";
+import { BadRequestError, BadRequestGeoBoxError, BadRequestGeoBoxOutOfBoundsError, Conflict, NotFoundError } from "../../error";
 import { HttpStatus } from "../../httpStatus";
 import { parking } from "../../interfaces/parking.interface";
 import { boxArea } from "../../interfaces/boxArea.interface";
-import { QueryResult } from "pg";
+import { DatabaseError, QueryResult } from "pg";
 import { modifieAttendance as modAttendanceAux } from "./parkingAux";
 import { sendMoney } from "../Balance/balanceAux";
 
@@ -15,15 +15,52 @@ export async function addParking(req: Request, res: Response, next: NextFunction
     try {
         const newPark: parking = req.body;
 
+        //NEW METHOD
+
+        let strQuery = 'INSERT INTO parkings(geog, name, capacity, ownermail';
+        let values = ['SRID=4326;POINT(' + newPark.lon + ' ' + newPark.lat + ')', newPark.name, newPark.capacity, newPark.ownerMail];
+        if (newPark.openHour){
+            strQuery+= ', openHour';
+            values.push(newPark.openHour);
+        }
+        if (newPark.closeHour){
+            strQuery+= ', closeHour';
+            values.push(newPark.closeHour);
+        }
+        if (newPark.phone){
+            strQuery+= ', phone';
+            values.push(newPark.phone);
+        }
+        if (newPark.pricexminute){
+            strQuery+= ', pricexminute';
+            values.push(newPark.pricexminute);
+        }
+        strQuery += ') VALUES($1';
+        for (let i = 2; i <= values.length; i++) {
+            strQuery += `, $${i}`;
+        }
+        strQuery+= ')';
+        console.log("Query: " + strQuery);
+        
+
+        //FINISH OF NEW METHOD
+
         const conn = connect();
-        await conn.query('INSERT INTO parkings(geog, name, capacity, openHour, closeHour, phone, rating, ownermail, attendance, pricexminute)'
-            + 'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
-            ['SRID=4326;POINT(' + newPark.lon + ' ' + newPark.lat + ')', newPark.name, newPark.capacity,
-            newPark.openHour ? newPark.openHour : null, newPark.closeHour ? newPark.closeHour : null,
-            newPark.phone ? newPark.phone : null, 0, newPark.ownerMail, null, newPark.pricexminute]);
+        await conn.query(strQuery, values);
         return res.status(HttpStatus.OK).json({ response: 'Succesfuly created parking' })
     } catch (err) {
-        return next(err);
+        if (err instanceof DatabaseError){
+            const dbErr: DatabaseError = err as DatabaseError;
+            if (dbErr.code === '23505'){
+                if (dbErr.constraint === 'parkings_name_key') return next(new Conflict(true, 
+                    'The name was already taken, try another name',
+                    'name', req.body.mail));
+            }else if (dbErr.code === '23502'){
+                //TODO: manage all individual columns to return the corresponding message
+                return next(new BadRequestError(true, dbErr.column as string))
+            }
+        }
+        next(err);
     }
 }
 
