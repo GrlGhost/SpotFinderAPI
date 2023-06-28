@@ -10,7 +10,7 @@ export async function sendMoney(senderMail: string, recipientMail: string, balan
         await client.query('BEGIN');
         
         // Check if sender has sufficient balance
-        const senderBalanceQuery = 'SELECT balance FROM balance WHERE mail = $1';
+        const senderBalanceQuery = 'SELECT balance_c FROM balance WHERE mail = $1';
         const senderBalanceResult: QueryResult = await client.query(senderBalanceQuery, [senderMail]);
       
         if (senderBalanceResult.rowCount === 0) throw new NotFoundError(true, 'senderMail');
@@ -24,12 +24,19 @@ export async function sendMoney(senderMail: string, recipientMail: string, balan
         }
         
         // Subtract the amount from the sender's balance
-        await client.query('UPDATE balance SET balance = balance - $1 WHERE mail = $2', [balance, senderMail]);
+        await client.query('UPDATE balance SET balance_c = balance_c - $1 WHERE mail = $2', [balance, senderMail]);
       
+        console.log("reached hear");
+        
         // Add the amount to the recipient's balance
-        const updateRecipientBalanceQuery = 'INSERT INTO balance (mail, balance) VALUES ($1, $2) ' +
-        'ON CONFLICT (mail) DO UPDATE SET balance = balance + $2';
+        const updateRecipientBalanceQuery = 'INSERT INTO balance (mail, balance_c) VALUES ($1, $2) ' +
+        'ON CONFLICT (mail) DO UPDATE SET balance_c = balance.balance_c + $2';
         await client.query(updateRecipientBalanceQuery, [recipientMail, balance]);
+    
+    
+
+        console.log("reached hear 2");
+        
       
         await client.query('COMMIT');
     } catch (error) {

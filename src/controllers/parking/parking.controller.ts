@@ -150,7 +150,6 @@ export async function modifieAttendance(req: Request, res: Response, next: NextF
     try {
         const increase: boolean = req.body.increase;
         const userMail: string | null = req.body.userMail;
-        await modAttendanceAux(parseInt(req.params.id), userMail, increase, false, req.body.appClients);
 
         if (req.body.automatedExit){
             if (userMail === null) throw new Error('Unexpected error, automated exit without mail');
@@ -170,8 +169,9 @@ export async function modifieAttendance(req: Request, res: Response, next: NextF
             let minutes = time[1]-timeEntry[1];
             minutes = (time[0]-timeEntry[0])*60;
 
-            sendMoney(userMail, qRes.rows[0].ownermail, qRes.rows[0].pricexminute*minutes);   
+            await sendMoney(userMail, qRes.rows[0].ownermail, qRes.rows[0].pricexminute*minutes);   
         }
+        await modAttendanceAux(parseInt(req.params.id), userMail, increase, false, req.body.appClients);
 
         res.status(HttpStatus.OK).send('correctly updated');
     } catch (err) {

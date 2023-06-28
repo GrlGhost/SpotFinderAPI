@@ -12,7 +12,7 @@ export async function addBalance(req: Request, res: Response, next: NextFunction
         }
 
         const conn = connect();
-        let qRes: QueryResult = await conn.query('UPDATE balance SET balance = balance + $1 WHERE mail = $2', [req.body.balance, req.params.mail]);
+        let qRes: QueryResult = await conn.query('UPDATE balance SET balance_c = balance_c + $1 WHERE mail = $2', [req.body.balance, req.params.mail]);
         if (qRes.rowCount === 0) {
             qRes = await conn.query('INSERT INTO balance VALUES($1, $2)', [req.params.mail, req.body.balance]); 
         }
@@ -26,7 +26,7 @@ export async function addBalance(req: Request, res: Response, next: NextFunction
 export async function getBalance(req: Request, res: Response, next: NextFunction){
     try{
         const conn = connect();
-        const qRes = await conn.query('SELECT balance FROM balance WHERE mail = $1', [req.params.mail]);
+        const qRes = await conn.query('SELECT balance_c FROM balance WHERE mail = $1', [req.params.mail]);
         if (qRes.rowCount === 0) res.status(HttpStatus.OK).send({balance: 0, message: 'operation made succesefully'});
         else res.status(HttpStatus.OK).send({balance: qRes.rows[0].balance, message: 'operation made succesfully'});
     }catch(err){
